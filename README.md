@@ -13,7 +13,7 @@
 <img width="1502" height="1305" alt="Image" src="https://github.com/user-attachments/assets/154e5dc0-5d80-4e2e-97e6-60dc4c001883" />
 
 리듬 게임
-<img width="1896" height="1345" alt="Image" src="https://github.com/user-attachments/assets/8adad41e-f12c-4326-8cfb-f0960648b6e7" />
+<img width="1896" height="1312" alt="Image" src="https://github.com/user-attachments/assets/835a4ac1-cb17-41f9-a45c-6b00e2527261" />
 
 행성 피하기 게임
 <img width="1084" height="551" alt="Image" src="https://github.com/user-attachments/assets/364c0950-3471-4dbe-b439-8068c00a959c" />
