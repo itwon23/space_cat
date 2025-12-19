@@ -9,6 +9,16 @@
 주요 기능으로는 고양이 상태 관리 / 아이템 및 인벤토리 관리 / 미니게임: 리듬게임, 행성 피하기 가 있다.
 기본이자 메인 기능은 고양이의 상태 수치를 회복하는 고양이 상태 관리 기능이고, 미니게임을 통해 획득한 아이템을 적재적소에 사용하여 생존해야한다.
 
+고양이 상태 관리 화면
+<img width="1896" height="1345" alt="Image" src="https://github.com/user-attachments/assets/8adad41e-f12c-4326-8cfb-f0960648b6e7" />
+
+리듬 게임
+<img width="1084" height="551" alt="Image" src="https://github.com/user-attachments/assets/364c0950-3471-4dbe-b439-8068c00a959c" />
+
+행성 피하기 게임
+<img width="1502" height="1305" alt="Image" src="https://github.com/user-attachments/assets/154e5dc0-5d80-4e2e-97e6-60dc4c001883" />
+
+
 2021110783 이창준
 2022115390 김미진
 2023015077 이지원
