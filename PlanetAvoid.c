@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -666,16 +667,25 @@ int planet_avoid_game() {
         "|   가끔 큰 달 운석이 나타납니다!          |",
         "|                                          |",
         "+==========================================+",
-        "|  난이도: [1]하 [2]중 [3]상               |",
+        "|        난이도: [1]하 [2]중 [3]상         |",
+        "|       1[3]번 누르고 엔터 게임시작        |",
+        "|       2[3]번 누르고 엔터 게임시작        |",
+        "|       3[3]번 누르고 엔터 게임시작        |",
         "+==========================================+"
     };
-print_center(rules, 17);
+print_center(rules, 20);
+
+
+
+
+int tmp;
+while ((tmp = getchar()) != '\n' && tmp != EOF);
+
 
 
 system("stty raw -echo");
 int c = getchar();
 system("stty cooked echo");
-printf("\n");
 
 // 남은 입력 제거
 const char* message;
@@ -737,7 +747,7 @@ const char* end_lines[] = {
     line3,
     "+==========================================+",
     "|                                          |",
-    "|      'O' 키를 눌러 종료                  |",
+    "|      'O' 키 눌러 엔터 2번                |",
     "|                                          |",
     "+==========================================+"
 };
@@ -746,7 +756,6 @@ if (score > high_score) {
     high_score = score;
     save_high_score();
 }
-printf("\n계속하려면 'o' 누르기: ");
 fflush(stdout);
 
 // raw 모드
