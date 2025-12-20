@@ -184,6 +184,7 @@ void print_center(const char* lines[], int count) {
     fflush(stdout);
 }
 
+
 // 장애물 타입
 typedef struct { 
     int x; 
@@ -191,34 +192,34 @@ typedef struct {
     char symbol;
     int is_big;
 } Obstacle;
-Obstacle obstacles[MAX_ASTEROIDS];
-int obstacle_count = 0;
+static Obstacle obstacles[MAX_ASTEROIDS];        
+static int obstacle_count = 0;                   
 
-pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
-pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
-volatile int running = 1;
+static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t cond = PTHREAD_COND_INITIALIZER;  
+static volatile int running = 1;                   
 
-int cat_x = WIDTH / 2;
-int cat_y = HEIGHT - cat_height - 1;
-const char** current_cat = cat_front;
+static int cat_x = WIDTH / 2;                      
+static int cat_y = HEIGHT - cat_height - 1;       
+static const char** current_cat = cat_front;       
 
-int score = 0;
-int survival_time = 0;
-double start_time;
-int high_score = 0;
-int target_score = 500;
-int last_oxygen_time = 0;
-int lives = 2;
-const char* HIGHSCORE_FILE = "cat_space_highscore.txt";
+static int score = 0;                              
+static int survival_time = 0;                      
+static double start_time;                          
+static int high_score = 0;                         
+static int target_score = 500;                   
+static int last_oxygen_time = 0;                   
+static int lives = 2;                              
+static const char* HIGHSCORE_FILE = "cat_space_highscore.txt";  
 
 // 리스크 상태
 typedef enum { RISK_NONE, RISK_GRAVITY, RISK_DARKNESS, RISK_DARKNESS_WARNING, RISK_METEOR_STORM, RISK_OXYGEN_LEAK } RiskType;
-RiskType current_risk = RISK_NONE;
-double risk_end_time = 0;
-int cat_speed = 2;
-char risk_message[50] = "";
-int darkness_slow_mode = 0;
-int meteor_storm_mode = 0;
+static RiskType current_risk = RISK_NONE;
+static double risk_end_time = 0;
+static int cat_speed = 2;
+static char risk_message[50] = "";
+static int darkness_slow_mode = 0;
+static int meteor_storm_mode = 0;
 
 void load_high_score() {
     int fd = open(HIGHSCORE_FILE, O_RDONLY);
@@ -433,7 +434,7 @@ void draw_screen() {
     }
 
     int oxygen = survival_time / 10;
-    printf("\033[%d;%dH우주 체류: %d초 | 점수: %d/%d | 산소: %d개 | 목숨: %d", 
+    printf("\033[%d;%dH우주 체류: %d초 | 점수: %d/%d | 우주 산소통: %d개 | 목숨: %d", 
            HEIGHT + 1, game_offset_col + 1, survival_time, score, target_score, oxygen, lives);
     
     if (risk_message[0] != '\0') {
@@ -635,7 +636,7 @@ int run_game() {
     return success ? 2 : (collided ? 1 : 0);
 }
 
-int main() {
+int planet_avoid_game() {
     init_terminal();
     
     struct timespec ts;
@@ -656,7 +657,7 @@ int main() {
         "|                                          |",
         "|  [목표]                                  |",
         "|   우주 장애물을 피하세요!                |",
-        "|   *=소행성 O=파편 #=위성 @=혜성 X=운석  |",
+        "|   *=소행성 O=파편 #=위성 @=혜성 X=운석   |",
         "|   가끔 큰 달 운석이 나타납니다!          |",
         "|                                          |",
         "+==========================================+",
@@ -671,17 +672,17 @@ int main() {
         base_spawn = 20; base_speed_ns = 350000000; max_asteroids = 15;
         target_score = 50;
         lives = 3;
-        message = "|  [ 하 ] 목표: 50점 (목숨 3개)           |";
+        message = "|  [ 하 ] 목표: 50점 (목숨 3개)            |";
     } else if (c == '2') {
         base_spawn = 25; base_speed_ns = 300000000; max_asteroids = 20;
         target_score = 80;
         lives = 2;
-        message = "|  [ 중 ] 목표: 80점 (목숨 2개)           |";
-    } else {
+        message = "|  [ 중 ] 목표: 80점 (목숨 2개)            |";
+    } else { 
         base_spawn = 35; base_speed_ns = 250000000; max_asteroids = 25;
         target_score = 100;
         lives = 1;
-        message = "|  [ 상 ] 목표: 100점 (목숨 1개)          |";
+        message = "|  [ 상 ] 목표: 100점 (목숨 1개)           |";
     }
 
     const char* msg_block[] = { 
@@ -712,20 +713,20 @@ int main() {
     if (score < 10) {
         snprintf(line2, sizeof(line2), "|  최종 점수: %d점                         |", score);
     } else if (score < 100) {
-        snprintf(line2, sizeof(line2), "|  최종 점수: %d점                        |", score);
+        snprintf(line2, sizeof(line2), "|  최종 점수: %d점                         |", score);
     } else if (score < 1000) {
-        snprintf(line2, sizeof(line2), "|  최종 점수: %d점                       |", score);
+        snprintf(line2, sizeof(line2), "|  최종 점수: %d점                         |", score);
     } else {
-        snprintf(line2, sizeof(line2), "|  최종 점수: %d점                      |", score);
-    }
+        snprintf(line2, sizeof(line2), "|  최종 점수: %d점                         |", score);
+    }  
     
     if (oxygen < 10) {
-        snprintf(line3, sizeof(line3), "|  산소: %d개                              |", oxygen);
+        snprintf(line3, sizeof(line3), "|  우주 산소통: %d개                           |", oxygen);
     } else if (oxygen < 100) {
-        snprintf(line3, sizeof(line3), "|  산소: %d개                             |", oxygen);
+        snprintf(line3, sizeof(line3), "|  우주 산소통: %d개                           |", oxygen);
     } else {
-        snprintf(line3, sizeof(line3), "|  산소: %d개                            |", oxygen);
-    }
+        snprintf(line3, sizeof(line3), "|  우주 산소통: %d개                           |", oxygen);
+    } 
     
     const char* end_lines[] = {
         "+==========================================+",
