@@ -347,10 +347,30 @@
                 break;
 
             case 2:
-                
-                pthread_mutex_unlock(&lock);
-                sleep(1);
-                break;
+    		printf("행성 피하기 게임 시작!\n");
+    		sleep(1);
+    
+  		// SpaceCatGame 입력 스레드 잠시 중단
+    		pthread_mutex_lock(&lock);
+    		int saved_running = running;
+    		running = 0;  
+
+		// 입력 스레드 일시 중단
+    		pthread_mutex_unlock(&lock);
+    
+   		sleep(1);  
+		// 스레드가 멈출 시간
+  		extern int planet_avoid_game();
+    		planet_avoid_game();
+
+		// SpaceCatGame 입력 스레드 재시작
+    		pthread_mutex_lock(&lock);
+    		running = saved_running;
+    		pthread_mutex_unlock(&lock);
+    
+ 		printf("게임 종료! 메인으로 돌아갑니다.\n");
+    		sleep(2);
+    		break;
 
             default:
                 printf("잘못된 선택!\n");

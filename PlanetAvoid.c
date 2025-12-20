@@ -547,7 +547,7 @@ void* risk_thread(void* arg) {
     return NULL;
 }
 
-void* input_thread(void* arg) {
+static void* input_thread(void* arg) {
     (void)arg;
     fd_set readfds;
     struct timeval tv;
