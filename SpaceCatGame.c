@@ -6,7 +6,7 @@
     #include <time.h>
 
     #include "Inventory.h"
-
+    #include "rhythm.h"
     typedef struct {
         int hunger;
         int oxygen;
@@ -28,6 +28,10 @@
     volatile int item_choice = -1;  
     char last_event[256] = "";
     float repair_progress = 0.0;  
+
+    static pthread_t th_input;
+    static int input_thread_alive = 0;
+
 
     void print_repair_bar(int filled, int total) {
         printf("[");
@@ -93,7 +97,11 @@
 
 
     void* input_thread(void* arg) {
+        pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+        pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
+
         while (running) {
+
             int input;
             if (scanf("%d", &input) == 1) {
                 if (user_choice == -1) {
@@ -340,11 +348,33 @@
                 sleep(1);
                 return;
 
-            case 1:
-                
+            case 1: {
+                if (input_thread_alive) {
+                    pthread_cancel(th_input);
+                    pthread_join(th_input, NULL);
+                    input_thread_alive = 0;
+                }
+
+                RhythmGameResult r = rhythm_game();
+
+                pthread_mutex_lock(&lock);
+
+                for (int i = 0; i < r.reward_count; i++) {
+                    if (inv.food_count >= 10) break;
+                    inv.food[inv.food_count] = r.reward;
+                    inv.food_count++;
+                }
                 pthread_mutex_unlock(&lock);
+
+                pthread_create(&th_input, NULL, input_thread, NULL);
+                input_thread_alive = 1;
+
+                printf("\n[🎵 리듬 게임 🎵 완료] %s x %d 획득!\n", r.reward.name, r.reward_count);
                 sleep(1);
-                break;
+                return;
+            }
+
+
 
             case 2:
     		printf("행성 피하기 게임 시작!\n");
@@ -436,11 +466,13 @@
         strcpy(inv.oxygen[0].name, "미니 산소통"); inv.oxygen[0].recovery = 15;
         strcpy(inv.oxygen[1].name, "우주 산소통"); inv.oxygen[1].recovery = 30;
 
-        pthread_t th_status, th_input, th_repair;
+        pthread_t th_status, th_repair;
 
-        
         pthread_create(&th_status, NULL, decrease_status, NULL);
+
         pthread_create(&th_input, NULL, input_thread, NULL);
+        input_thread_alive = 1;
+
         pthread_create(&th_repair, NULL, repair_thread, NULL);
 
         while (running) {
