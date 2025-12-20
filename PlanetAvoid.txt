@@ -669,34 +669,26 @@ int planet_avoid_game() {
         "|  난이도: [1]하 [2]중 [3]상               |",
         "+==========================================+"
     };
-print_center(rules, 17);
+    print_center(rules, 17);
 
-
-system("stty raw -echo");
-int c = getchar();
-system("stty cooked echo");
-printf("\n");
-
-// 남은 입력 제거
-const char* message;
-if (c == '1') {
-    base_spawn = 20; base_speed_ns = 350000000; max_asteroids = 15;
-    target_score = 50;
-    lives = 3;
-    message = "|  [ 하 ] 목표: 50점 (목숨 3개)            |";
-} else if (c == '2') {
-    base_spawn = 25; base_speed_ns = 300000000; max_asteroids = 20;
-    target_score = 80;
-    lives = 2;
-    message = "|  [ 중 ] 목표: 80점 (목숨 2개)            |";
-} else {
-    base_spawn = 35; base_speed_ns = 250000000; max_asteroids = 25;
-    target_score = 100;
-    lives = 1;
-    message = "|  [ 상 ] 목표: 100점 (목숨 1개)           |";
-}
-
-
+    int c = getchar();
+    const char* message;
+    if (c == '1') {
+        base_spawn = 20; base_speed_ns = 350000000; max_asteroids = 15;
+        target_score = 50;
+        lives = 3;
+        message = "|  [ 하 ] 목표: 50점 (목숨 3개)            |";
+    } else if (c == '2') {
+        base_spawn = 25; base_speed_ns = 300000000; max_asteroids = 20;
+        target_score = 80;
+        lives = 2;
+        message = "|  [ 중 ] 목표: 80점 (목숨 2개)            |";
+    } else { 
+        base_spawn = 35; base_speed_ns = 250000000; max_asteroids = 25;
+        target_score = 100;
+        lives = 1;
+        message = "|  [ 상 ] 목표: 100점 (목숨 1개)           |";
+    }
 
     const char* msg_block[] = { 
         "+==========================================+",
@@ -723,37 +715,40 @@ if (c == '1') {
 	    strcpy(line1, "|  종료                                    |");
 	}
 
-	snprintf(line2, sizeof(line2), "|  최종 점수  %3d점                        |", score);
-	snprintf(line3, sizeof(line3), "|  우주 산소통  %3d개                      |", oxygen);	 
+	snprintf(line2, sizeof(line2), "|  최종 점수 %3d점                        |", score);
+	snprintf(line3, sizeof(line3), "|  우주 산소통 %3d개                      |", oxygen);	 
 
-const char* end_lines[] = {
-    "+==========================================+",
-    "|                                          |",
-    "|              게임 종료                   |",
-    "|                                          |",
-    "+==========================================+",
-    line1,
-    line2,
-    line3,
-    "+==========================================+",
-    "|                                          |",
-    "|      'O' 키를 눌러 종료                  |",
-    "|                                          |",
-    "+==========================================+"
-};
-print_center(end_lines, 13);
-if (score > high_score) {
-    high_score = score;
-    save_high_score();
-}
-printf("\n계속하려면 'o' 누르기: ");
-fflush(stdout);
+    const char* end_lines[] = {
+        "+==========================================+",
+        "|                                          |",
+        "|              게임 종료                   |",
+        "|                                          |",
+        "+==========================================+",
+        line1,
+        line2,
+        line3,
+        "+==========================================+",
+        "|                                          |",
+        "|      'O' 키를 눌러 종료                  |",
+        "|                                          |",
+        "+==========================================+"
+    };
+    
+    print_center(end_lines, 13);
 
-// raw 모드
-system("stty raw -echo");
-int key = getchar();
-system("stty cooked echo");
+    if (score > high_score) {
+        high_score = score;
+        save_high_score();
+    }
 
-printf("\033[2J\033[H");
-return 0;
+    while (1) {
+        int key = getchar();
+        if (key == 'o' || key == 'O') break;
+    }
+
+
+    printf("\033[2J\033[H");
+    fflush(stdout);
+    usleep(100000);
+    return 0;
 }
