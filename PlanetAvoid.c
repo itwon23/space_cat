@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -9,8 +8,6 @@
 #include <fcntl.h>
 #include <sys/select.h>
 #include <sys/ioctl.h>
-#include "Inventory.h"
-extern Inventory global_inventory;
 
 #define WIDTH 80
 #define HEIGHT 40
@@ -197,11 +194,11 @@ typedef struct {
     int is_big;
 } Obstacle;
 static Obstacle obstacles[MAX_ASTEROIDS];        
-static int obstacle_count = 0;       
+static int obstacle_count = 0;                   
 
-extern pthread_mutex_t planet_lock;
+static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t cond = PTHREAD_COND_INITIALIZER;  
-static volatile int planet_running = 1;                   
+static volatile int running = 1;                   
 
 static int cat_x = WIDTH / 2;                      
 static int cat_y = HEIGHT - cat_height - 1;       
@@ -287,7 +284,7 @@ void draw_background_arts() {
 }
 
 int check_collision() {
-    pthread_mutex_lock(&planet_lock);
+    pthread_mutex_lock(&lock);
     for (int i = 0; i < obstacle_count; i++) {
         int ax = obstacles[i].x;
         int ay = obstacles[i].y;
@@ -320,14 +317,14 @@ int check_collision() {
                 for (int j = i; j < obstacle_count - 1; j++)
                     obstacles[j] = obstacles[j + 1];
                 obstacle_count--;
-                pthread_mutex_unlock(&planet_lock);
+                pthread_mutex_unlock(&lock);
                 return 0;
             }
-            pthread_mutex_unlock(&planet_lock);
+            pthread_mutex_unlock(&lock);
             return 1;
         }
     }
-    pthread_mutex_unlock(&planet_lock);
+    pthread_mutex_unlock(&lock);
     return 0;
 }
 
@@ -364,7 +361,7 @@ void draw_screen() {
         screen[i][WIDTH - 1] = '|';
     }
 
-    pthread_mutex_lock(&planet_lock);
+    pthread_mutex_lock(&lock);
     
     double now = get_time_seconds();
     survival_time = (int)(now - start_time);
@@ -420,7 +417,7 @@ void draw_screen() {
     
     score = survival_time;
     
-    pthread_mutex_unlock(&planet_lock);
+    pthread_mutex_unlock(&lock);
 
     for (int i = 0; i < cat_height; i++) {
         for (int j = 0; j < cat_width && current_cat[i][j] != '\0'; j++) {
@@ -454,7 +451,7 @@ void* asteroid_thread(void* arg) {
     char obstacle_types[] = {'*', 'O', '#', '@', 'X'};
     double last_big_spawn = 0;
     
-    while (planet_running) {
+    while (running) {
         double elapsed = get_time_seconds() - start_time;
         int spawn_percent = base_spawn + (int)elapsed / 3;
         if (spawn_percent > 60) spawn_percent = 60;
@@ -462,16 +459,16 @@ void* asteroid_thread(void* arg) {
         long sleep_duration = base_speed_ns - (long)(elapsed * 5000000);
         if (sleep_duration < 90000000) sleep_duration = 90000000;
         
-        pthread_mutex_lock(&planet_lock);
+        pthread_mutex_lock(&lock);
         if (darkness_slow_mode) {
             sleep_duration = sleep_duration * 2;
         }
         if (meteor_storm_mode) {
             sleep_duration = sleep_duration / 2;
         }
-        pthread_mutex_unlock(&planet_lock);
+        pthread_mutex_unlock(&lock);
 
-        pthread_mutex_lock(&planet_lock);
+        pthread_mutex_lock(&lock);
         double now = get_time_seconds();
         
         if (obstacle_count < max_asteroids - 1 && (now - last_big_spawn) > 15.0) {
@@ -504,7 +501,7 @@ void* asteroid_thread(void* arg) {
                 i--;
             }
         }
-        pthread_mutex_unlock(&planet_lock);
+        pthread_mutex_unlock(&lock);
         sleep_ns(sleep_duration);
     }
     return NULL;
@@ -514,13 +511,13 @@ void* risk_thread(void* arg) {
     (void)arg;
     unsigned int local_seed = rand_seed + 2;
     
-    while (planet_running) {
+    while (running) {
         int wait_time = 10 + (rand_r(&local_seed) % 11);
         sleep_ns(wait_time * 1000000000L);
         
-        if (!planet_running) break;
+        if (!running) break;
         
-        pthread_mutex_lock(&planet_lock);
+        pthread_mutex_lock(&lock);
         if (current_risk == RISK_NONE) {
             double now = get_time_seconds();
             int risk_type = rand_r(&local_seed) % 4;
@@ -546,17 +543,17 @@ void* risk_thread(void* arg) {
                 strcpy(risk_message, "산소 누출!");
             }
         }
-        pthread_mutex_unlock(&planet_lock);
+        pthread_mutex_unlock(&lock);
     }
     return NULL;
 }
 
-static void* planet_input_thread(void* arg) {
+static void* input_thread(void* arg) {
     (void)arg;
     fd_set readfds;
     struct timeval tv;
     
-    while (planet_running) {
+    while (running) {
         FD_ZERO(&readfds);
         FD_SET(STDIN_FILENO, &readfds);
         tv.tv_sec = 0;
@@ -566,24 +563,24 @@ static void* planet_input_thread(void* arg) {
         if (ret > 0) {
             int c = getchar();
             if (c == 'a' || c == 'A') {
-                pthread_mutex_lock(&planet_lock);
+                pthread_mutex_lock(&lock);
                 cat_x -= cat_speed;
                 if (cat_x < 1) cat_x = 1;
                 current_cat = cat_left;
-                pthread_mutex_unlock(&planet_lock);
+                pthread_mutex_unlock(&lock);
             } else if (c == 'd' || c == 'D') {
-                pthread_mutex_lock(&planet_lock);
+                pthread_mutex_lock(&lock);
                 cat_x += cat_speed;
                 if (cat_x > WIDTH - cat_width - 1)
                     cat_x = WIDTH - cat_width - 1;
                 current_cat = cat_right;
-                pthread_mutex_unlock(&planet_lock);
+                pthread_mutex_unlock(&lock);
             } else if (c == 'q' || c == 'Q') {
-                planet_running = 0;
+                running = 0;
             } else {
-                pthread_mutex_lock(&planet_lock);
+                pthread_mutex_lock(&lock);
                 current_cat = cat_front;
-                pthread_mutex_unlock(&planet_lock);
+                pthread_mutex_unlock(&lock);
             }
         }
     }
@@ -599,7 +596,7 @@ int run_game() {
     survival_time = 0;
     last_oxygen_time = 0;
     start_time = get_time_seconds();
-    planet_running = 1;
+    running = 1;
     current_risk = RISK_NONE;
     cat_speed = 2;
     darkness_slow_mode = 0;
@@ -610,24 +607,24 @@ int run_game() {
     draw_top_art_once();
     pthread_t tid_asteroid, tid_input, tid_risk;
     pthread_create(&tid_asteroid, NULL, asteroid_thread, NULL);
-   pthread_create(&tid_input, NULL, planet_input_thread, NULL); 
+    pthread_create(&tid_input, NULL, input_thread, NULL);
     pthread_create(&tid_risk, NULL, risk_thread, NULL);
 
     int collided = 0;
     int success = 0;
     
-    while (planet_running) {
+    while (running) {
         draw_screen();
         
         if (score >= target_score) {
             success = 1;
-            planet_running = 0;
+            running = 0;
             break;
         }
         
         if (check_collision()) {
             collided = 1;
-            planet_running = 0;
+            running = 0;
             break;
         }
         sleep_ns(100000000);
@@ -637,7 +634,7 @@ int run_game() {
     pthread_join(tid_asteroid, NULL);
     pthread_join(tid_risk, NULL);
     
-    planet_running = 0;
+    running = 0;
     usleep(100000);
     printf("\033[2J\033[H");  // 즉시 화면 클리어
     fflush(stdout);
@@ -645,15 +642,8 @@ int run_game() {
 }
 
 int planet_avoid_game() {
-    struct termios saved_termios;
-    tcgetattr(STDIN_FILENO, &saved_termios);
+    init_terminal();
     
-    //init_terminal();
-    // 터미널 설정 직접 추가 
-    struct termios new_termios = saved_termios;
-    new_termios.c_lflag &= ~(ICANON | ECHO);
-    tcsetattr(STDIN_FILENO, TCSANOW, &new_termios);
-    printf("\033[?25l");  // 커서 숨김
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
     rand_seed = ts.tv_nsec;
@@ -676,48 +666,29 @@ int planet_avoid_game() {
         "|   가끔 큰 달 운석이 나타납니다!          |",
         "|                                          |",
         "+==========================================+",
-        "|        난이도: [1]하 [2]중 [3]상         |",
+        "|  난이도: [1]하 [2]중 [3]상               |",
         "+==========================================+"
     };
-print_center(rules, 20);
-struct termios normal;
-    tcgetattr(STDIN_FILENO, &normal);
-    normal.c_lflag |= (ICANON | ECHO);
-    tcsetattr(STDIN_FILENO, TCSANOW, &normal);
+    print_center(rules, 17);
 
-
-
-
-int tmp;
-while ((tmp = getchar()) != '\n' && tmp != EOF);
-tcflush(STDIN_FILENO, TCIFLUSH);
-
-printf("\033[2J\033[H");  
-
-system("stty raw -echo");
-int c = getchar();
-system("stty cooked echo");
-
-// 남은 입력 제거
-const char* message;
-if (c == '1') {
-    base_spawn = 20; base_speed_ns = 350000000; max_asteroids = 15;
-    target_score = 50;
-    lives = 3;
-    message = "|  [ 하 ] 목표: 50점 (목숨 3개)            |";
-} else if (c == '2') {
-    base_spawn = 25; base_speed_ns = 300000000; max_asteroids = 20;
-    target_score = 80;
-    lives = 2;
-    message = "|  [ 중 ] 목표: 80점 (목숨 2개)            |";
-} else {
-    base_spawn = 35; base_speed_ns = 250000000; max_asteroids = 25;
-    target_score = 100;
-    lives = 1;
-    message = "|  [ 상 ] 목표: 100점 (목숨 1개)           |";
-}
-
-
+    int c = getchar();
+    const char* message;
+    if (c == '1') {
+        base_spawn = 20; base_speed_ns = 350000000; max_asteroids = 15;
+        target_score = 50;
+        lives = 3;
+        message = "|  [ 하 ] 목표: 50점 (목숨 3개)            |";
+    } else if (c == '2') {
+        base_spawn = 25; base_speed_ns = 300000000; max_asteroids = 20;
+        target_score = 80;
+        lives = 2;
+        message = "|  [ 중 ] 목표: 80점 (목숨 2개)            |";
+    } else { 
+        base_spawn = 35; base_speed_ns = 250000000; max_asteroids = 25;
+        target_score = 100;
+        lives = 1;
+        message = "|  [ 상 ] 목표: 100점 (목숨 1개)           |";
+    }
 
     const char* msg_block[] = { 
         "+==========================================+",
@@ -730,12 +701,10 @@ if (c == '1') {
     sleep_ns(2000000000);
 
     int result = run_game();
-   // printf("\033[2J\033[H");
-	int oxygen = survival_time / 10;
-	
-	add_oxygen(&global_inventory, oxygen);
-	sleep(2);  // 👈 추가
-	
+    printf("\033[2J\033[H");
+
+    int oxygen = survival_time / 10;
+
     char line1[100], line2[100], line3[100];
 
 	if (result == 2) {
@@ -749,36 +718,37 @@ if (c == '1') {
 	snprintf(line2, sizeof(line2), "|  최종 점수  %3d점                        |", score);
 	snprintf(line3, sizeof(line3), "|  우주 산소통  %3d개                      |", oxygen);	 
 
-const char* end_lines[] = {
-    "+==========================================+",
-    "|                                          |",
-    "|              게임 종료                   |",
-    "|                                          |",
-    "+==========================================+",
-    line1,
-    line2,
-    line3,
-    "+==========================================+",
-    "|                                          |",
-    "|      'O' 키 눌러 엔터 2번                |",
-    "|                                          |",
-    "+==========================================+"
-};
-print_center(end_lines, 13);
-if (score > high_score) {
-    high_score = score;
-    save_high_score();
-}
-fflush(stdout);
+    const char* end_lines[] = {
+        "+==========================================+",
+        "|                                          |",
+        "|              게임 종료                   |",
+        "|                                          |",
+        "+==========================================+",
+        line1,
+        line2,
+        line3,
+        "+==========================================+",
+        "|                                          |",
+        "|      'O' 키를 눌러 종료                  |",
+        "|                                          |",
+        "+==========================================+"
+    };
+    
+    print_center(end_lines, 13);
 
-// raw 모드
-system("stty raw -echo");
-int key = getchar();
-system("stty cooked echo");
+    if (score > high_score) {
+        high_score = score;
+        save_high_score();
+    }
 
-tcsetattr(STDIN_FILENO, TCSANOW, &saved_termios);
-printf("\033[?25h");
+    while (1) {
+        int key = getchar();
+        if (key == 'o' || key == 'O') break;
+    }
 
-printf("\033[2J\033[H");
-return 0;
+
+    printf("\033[2J\033[H");
+    fflush(stdout);
+    usleep(100000);
+    return 0;
 }
