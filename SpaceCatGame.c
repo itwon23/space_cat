@@ -259,6 +259,7 @@
 
         pthread_mutex_lock(&lock);
         status.hunger += inv.food[n-1].recovery;
+        if (status.hunger > 100) status.hunger = 100;
         pthread_mutex_unlock(&lock);
 
         printf("%s 사용!\n", inv.food[n-1].name);
@@ -311,6 +312,7 @@
 
         pthread_mutex_lock(&lock);
         status.oxygen += inv.oxygen[n-1].recovery;
+        if (status.oxygen > 100) status.oxygen = 100;
         pthread_mutex_unlock(&lock);
 
         printf("%s 사용!\n", inv.oxygen[n-1].name);
