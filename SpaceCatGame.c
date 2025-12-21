@@ -23,7 +23,7 @@
 
     CatStatus status;
     extern Inventory global_inventory;  
-    pthread_mutex_t lock;
+    pthread_mutex_t planet_lock;
     int running = 1;
 
     int dialogue_triggered_20 = 0;
@@ -514,7 +514,7 @@ void use_oxygen_item() {
         status.mood   = 70;
         running = 1;
 
-        pthread_mutex_init(&lock, NULL);
+        pthread_mutex_init(&planet_lock, NULL);
 
         global_inventory.food_count = 3;
         strcpy(global_inventory.food[0].name, "캔푸드"); global_inventory.food[0].recovery = 20;
@@ -573,5 +573,5 @@ void use_oxygen_item() {
         pthread_join(th_status, NULL);
         pthread_join(th_repair, NULL);
         pthread_cancel(th_input);
-        pthread_mutex_destroy(&lock);
+        pthread_mutex_destroy(&planet_lock);
     }
