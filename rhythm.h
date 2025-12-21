@@ -4,7 +4,6 @@
 #include "Inventory.h"
 
 typedef struct {
-    int score;
     Item reward;
     int reward_count;    // score / 7
 } RhythmGameResult;

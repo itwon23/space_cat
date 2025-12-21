@@ -5,7 +5,7 @@
 Inventory global_inventory;        
 
 int main() {
-    init_inventory(&global_inventory);  
+    //init_inventory(&global_inventory);  
     show_title();
     show_prologue();
     run_space_cat_game();

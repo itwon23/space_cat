@@ -1,3 +1,4 @@
+#include "PlanetAvoid.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -435,7 +436,7 @@ void draw_screen() {
     }
 
     int oxygen = survival_time / 10;
-    printf("\033[%d;%dH우주 체류: %d초 | 점수: %d/%d | 우주 산소통: %d개 | 목숨: %d", 
+    printf("\033[%d;%dH우주 체류: %d초 | 점수: %d/%d | 보상: %d개 | 목숨: %d", 
            HEIGHT + 1, game_offset_col + 1, survival_time, score, target_score, oxygen, lives);
     
     if (risk_message[0] != '\0') {
@@ -641,9 +642,12 @@ int run_game() {
     return success ? 2 : (collided ? 1 : 0);
 }
 
-int planet_avoid_game() {
+PlanetAvoidResult planet_avoid_game() {
     init_terminal();
-    
+
+    PlanetAvoidResult out = {{0}, 0};
+    out.reward = make_item("미니 산소통", 15);  // 기본값
+
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
     rand_seed = ts.tv_nsec;
@@ -673,22 +677,33 @@ int planet_avoid_game() {
 
     int c = getchar();
     const char* message;
+	while (1) {
+    c = getchar();
+    
     if (c == '1') {
         base_spawn = 20; base_speed_ns = 350000000; max_asteroids = 15;
         target_score = 50;
         lives = 3;
+        out.reward = make_item("미니 산소통", 15);
         message = "|  [ 하 ] 목표: 50점 (목숨 3개)            |";
+        break;
     } else if (c == '2') {
         base_spawn = 25; base_speed_ns = 300000000; max_asteroids = 20;
         target_score = 80;
         lives = 2;
+        out.reward = make_item("우주 산소통", 30);
         message = "|  [ 중 ] 목표: 80점 (목숨 2개)            |";
-    } else { 
+        break;
+    } else if (c == '3') { 
         base_spawn = 35; base_speed_ns = 250000000; max_asteroids = 25;
         target_score = 100;
         lives = 1;
+        out.reward = make_item("우주 산소통", 30);
         message = "|  [ 상 ] 목표: 100점 (목숨 1개)           |";
+        break;
     }
+ 
+}
 
     const char* msg_block[] = { 
         "+==========================================+",
@@ -703,7 +718,7 @@ int planet_avoid_game() {
     int result = run_game();
     printf("\033[2J\033[H");
 
-    int oxygen = survival_time / 10;
+    out.reward_count = score / 10;
 
     char line1[100], line2[100], line3[100];
 
@@ -716,7 +731,7 @@ int planet_avoid_game() {
 	}
 
 	snprintf(line2, sizeof(line2), "|  최종 점수  %3d점                        |", score);
-	snprintf(line3, sizeof(line3), "|  우주 산소통  %3d개                      |", oxygen);	 
+	snprintf(line3, sizeof(line3), "|  [%s]  %3d개                    |", out.reward.name, out.reward_count);	 
 
     const char* end_lines[] = {
         "+==========================================+",
@@ -750,5 +765,5 @@ int planet_avoid_game() {
     printf("\033[2J\033[H");
     fflush(stdout);
     usleep(100000);
-    return 0;
+    return out;
 }
