@@ -9,6 +9,8 @@
 #include <fcntl.h>
 #include <sys/select.h>
 #include <sys/ioctl.h>
+#include "Inventory.h"
+extern Inventory global_inventory;
 
 #define WIDTH 80
 #define HEIGHT 40
