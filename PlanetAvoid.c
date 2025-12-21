@@ -201,7 +201,7 @@ static int obstacle_count = 0;
 
 static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t cond = PTHREAD_COND_INITIALIZER;  
-static volatile int running = 1;                   
+static volatile int planet_running = 1;                   
 
 static int cat_x = WIDTH / 2;                      
 static int cat_y = HEIGHT - cat_height - 1;       
@@ -454,7 +454,7 @@ void* asteroid_thread(void* arg) {
     char obstacle_types[] = {'*', 'O', '#', '@', 'X'};
     double last_big_spawn = 0;
     
-    while (running) {
+    while (planet_running) {
         double elapsed = get_time_seconds() - start_time;
         int spawn_percent = base_spawn + (int)elapsed / 3;
         if (spawn_percent > 60) spawn_percent = 60;
@@ -514,11 +514,11 @@ void* risk_thread(void* arg) {
     (void)arg;
     unsigned int local_seed = rand_seed + 2;
     
-    while (running) {
+    while (planet_running) {
         int wait_time = 10 + (rand_r(&local_seed) % 11);
         sleep_ns(wait_time * 1000000000L);
         
-        if (!running) break;
+        if (!planet_running) break;
         
         pthread_mutex_lock(&lock);
         if (current_risk == RISK_NONE) {
@@ -556,7 +556,7 @@ static void* planet_input_thread(void* arg) {
     fd_set readfds;
     struct timeval tv;
     
-    while (running) {
+    while (planet_running) {
         FD_ZERO(&readfds);
         FD_SET(STDIN_FILENO, &readfds);
         tv.tv_sec = 0;
@@ -579,7 +579,7 @@ static void* planet_input_thread(void* arg) {
                 current_cat = cat_right;
                 pthread_mutex_unlock(&lock);
             } else if (c == 'q' || c == 'Q') {
-                running = 0;
+                planet_running = 0;
             } else {
                 pthread_mutex_lock(&lock);
                 current_cat = cat_front;
@@ -599,7 +599,7 @@ int run_game() {
     survival_time = 0;
     last_oxygen_time = 0;
     start_time = get_time_seconds();
-    running = 1;
+    planet_running = 1;
     current_risk = RISK_NONE;
     cat_speed = 2;
     darkness_slow_mode = 0;
@@ -616,18 +616,18 @@ int run_game() {
     int collided = 0;
     int success = 0;
     
-    while (running) {
+    while (planet_running) {
         draw_screen();
         
         if (score >= target_score) {
             success = 1;
-            running = 0;
+            planet_running = 0;
             break;
         }
         
         if (check_collision()) {
             collided = 1;
-            running = 0;
+            planet_running = 0;
             break;
         }
         sleep_ns(100000000);
@@ -637,7 +637,7 @@ int run_game() {
     pthread_join(tid_asteroid, NULL);
     pthread_join(tid_risk, NULL);
     
-    running = 0;
+    planet_running = 0;
     usleep(100000);
     printf("\033[2J\033[H");  // 즉시 화면 클리어
     fflush(stdout);
