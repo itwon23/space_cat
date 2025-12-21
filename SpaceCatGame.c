@@ -59,7 +59,7 @@
         else if (r < 35) {
             strcpy(last_event, "🍀 우주 고양이가 선물을 줬다! 생선스낵 +4!\n"
                             "\"이것봐라~ 저쪽에서 찾아왔어. 맛있겠다 그치!\"");
-            if (inv.food_count < 10) {
+            if (inv.food_count < 20) {
                 strcpy(inv.food[inv.food_count].name, "생선스낵");
                 inv.food[inv.food_count].recovery = 10;
                 inv.food_count++;
@@ -78,11 +78,11 @@
 
     void* decrease_status(void* arg) {
         while (running) {
-            sleep(3);
+            sleep(5);
 
             pthread_mutex_lock(&lock);
             status.hunger -= rand() % 2 + 1;
-            status.oxygen -= rand() % 2 + 1;
+            status.oxygen -= rand() % 2  + 1;
             status.mood   -= rand() % 2 + 1;
 
             trigger_random_event();
@@ -360,7 +360,7 @@
                 pthread_mutex_lock(&lock);
 
                 for (int i = 0; i < r.reward_count; i++) {
-                    if (inv.food_count >= 10) break;
+                    if (inv.food_count >=20) break;
                     inv.food[inv.food_count] = r.reward;
                     inv.food_count++;
                 }
@@ -368,6 +368,11 @@
 
                 pthread_create(&th_input, NULL, input_thread, NULL);
                 input_thread_alive = 1;
+
+                pthread_mutex_lock(&lock);
+                status.mood += 20;
+                if (status.mood > 100) status.mood = 100; 
+                pthread_mutex_unlock(&lock);
 
                 printf("\n[🎵 리듬 게임 🎵 완료] %s x %d 획득!\n", r.reward.name, r.reward_count);
                 sleep(1);
@@ -381,6 +386,12 @@
     		sleep(1);
     
     		system("./planet_avoid");
+            
+            pthread_mutex_lock(&lock);
+            status.mood += 20;
+            if (status.mood > 100) status.mood = 100;  
+            pthread_mutex_unlock(&lock);
+
 	        system("stty -echo -icanon");    
     		printf("게임 종료! 메인으로 돌아갑니다.\n");
     		sleep(2);
@@ -433,9 +444,9 @@
         
         srand(time(NULL));
 
-        status.hunger = 30;
-        status.oxygen = 30;
-        status.mood   = 30;
+        status.hunger = 70;
+        status.oxygen = 70;
+        status.mood   = 70;
         running = 1;
 
         pthread_mutex_init(&lock, NULL);

@@ -7,10 +7,10 @@ typedef struct {
 } Item;
 
 typedef struct {
-    Item food[10];
+    Item food[20];
     int food_count;
 
-    Item oxygen[10];
+    Item oxygen[20];
     int oxygen_count;
 } Inventory;
 
