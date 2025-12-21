@@ -721,7 +721,7 @@ if (c == '1') {
     sleep_ns(2000000000);
 
     int result = run_game();
-    printf("\033[2J\033[H");
+   // printf("\033[2J\033[H");
 	int oxygen = survival_time / 10;
 	printf("\n[DEBUG] survival_time: %d, oxygen: %d\n", survival_time, oxygen);  // 👈 추가
 	add_oxygen(&global_inventory, oxygen);
