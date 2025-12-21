@@ -22,6 +22,9 @@ void add_oxygen(Inventory* inv, int amount);
 int use_oxygen(Inventory* inv);
 void show_inventory(Inventory* inv);
 
+void sort_food();
+void sort_oxygen();
+
 static Item make_item(const char* name, int recovery) {
     Item it;
     memset(&it, 0, sizeof(it));
