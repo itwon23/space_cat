@@ -19,7 +19,7 @@ void add_food(Inventory* inv, const char* name, int recovery) {
 void add_oxygen(Inventory* inv, int amount) {
     for (int i = 0; i < amount && inv->oxygen_count < 20; i++) {
         strcpy(inv->oxygen[inv->oxygen_count].name, "산소통");
-        inv->oxygen[inv->oxygen_count].recovery = 0;
+        inv->oxygen[inv->oxygen_count].recovery = 1;
         inv->oxygen_count++;
     }
 }
