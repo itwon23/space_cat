@@ -17,18 +17,23 @@ void add_food(Inventory* inv, const char* name, int recovery) {
 }
 
 void add_oxygen(Inventory* inv, int amount) {
-    printf("[DEBUG] add_oxygen 호출: %d개 추가 시도\n", amount);
-    printf("[DEBUG] 현재 oxygen_count: %d\n", inv->oxygen_count);
-    
-    for (int i = 0; i < amount && inv->oxygen_count < 20; i++) {
+    if (inv->oxygen_count > 0) {
+        // 기존 산소통이 있으면 count 증가
+        inv->oxygen[0].count += amount;
+        printf("[DEBUG] 기존 산소통에 %d개 추가, 총 %d개\n", amount, inv->oxygen[0].count);
+        return;
+    }
+
+    // 새 산소통 아이템으로 추가
+    if (inv->oxygen_count < 20) {
         strcpy(inv->oxygen[inv->oxygen_count].name, "산소통");
         inv->oxygen[inv->oxygen_count].recovery = 1;
+        inv->oxygen[inv->oxygen_count].count = amount;
         inv->oxygen_count++;
-        printf("[DEBUG] %d번째 추가 완료\n", i+1);
+        printf("[DEBUG] 새 산소통 추가, 총 %d개\n", inv->oxygen[0].count);
     }
-    
-    printf("[DEBUG] 최종 oxygen_count: %d\n", inv->oxygen_count);
 }
+
 
 int use_oxygen(Inventory* inv) {
     if (inv->oxygen_count > 0) {
@@ -39,11 +44,20 @@ int use_oxygen(Inventory* inv) {
 }
 
 void show_inventory(Inventory* inv) {
+    
+    sort_food();
+    sort_oxygen();
+
+
     printf("\n===== 인벤토리 =====\n");
     printf("[음식] %d개\n", inv->food_count);
     for (int i = 0; i < inv->food_count; i++) {
         printf("  - %s (회복: %d)\n", inv->food[i].name, inv->food[i].recovery);
     }
-    printf("[산소통] %d개\n", inv->oxygen_count);
+    printf("[산소통] %d종\n", inv->oxygen_count);
+for (int i = 0; i < inv->oxygen_count; i++) {
+    printf("  %d) %s (+%d) x%d\n", i + 1, inv->oxygen[i].name, inv->oxygen[i].recovery, inv->oxygen[i].count);
+}
+
     printf("===================\n");
 }

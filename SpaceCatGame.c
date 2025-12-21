@@ -235,6 +235,8 @@ void use_food() {
         return;
     }
 
+    sort_food();
+
     ItemStack stacks[20];
     int stack_count = 0;
 
@@ -309,12 +311,37 @@ void use_oxygen_item() {
         sleep(1);
         return;
     }
+
+        sort_oxygen();
+
+        
+     ItemStack stacks[20];
+    int stack_count = 0;
+
+    for (int i = 0; i < global_inventory.oxygen_count; i++) {
+        int found = 0;
+        for (int j = 0; j < stack_count; j++) {
+            if (strcmp(global_inventory.oxygen[i].name, stacks[j].name) == 0 &&
+                global_inventory.oxygen[i].recovery == stacks[j].recovery) {
+                stacks[j].count++;
+                found = 1;
+                break;
+            }
+        }
+        if (!found) {
+            strcpy(stacks[stack_count].name, global_inventory.oxygen[i].name);
+            stacks[stack_count].recovery = global_inventory.oxygen[i].recovery;
+            stacks[stack_count].count = 1;
+            stack_count++;
+        }
+    }
     
-    // 단순화: oxygen_count만 사용 (배열 사용 안 함)
     printf("\n=== OXYGEN INVENTORY ===\n");
     printf("0) 뒤로가기\n");
-    printf("1) 우주 산소통 (+15) x%d\n", global_inventory.oxygen_count);
-    
+    for (int i = 0; i < stack_count; i++) {
+        printf("%d) %s (+%d) x%d\n", i+1, stacks[i].name, stacks[i].recovery, stacks[i].count);
+    }    
+
     printf("사용할 산소 번호: ");
     fflush(stdout);
     
@@ -340,8 +367,20 @@ void use_oxygen_item() {
     status.oxygen += 15;
     if (status.oxygen > 100) status.oxygen = 100;
     pthread_mutex_unlock(&planet_lock);
+
+    int removed = 0;
+    for (int i = 0; i < global_inventory.oxygen_count && !removed; i++) {
+        if (strcmp(global_inventory.oxygen[i].name, stacks[n-1].name) == 0 &&
+            global_inventory.oxygen[i].recovery == stacks[n-1].recovery) {
+            for (int j = i; j < global_inventory.oxygen_count - 1; j++) {
+                global_inventory.oxygen[j] = global_inventory.oxygen[j+1];
+            }
+            global_inventory.oxygen_count--;
+            removed = 1;
+        }
+    }
     
-    printf("우주 산소통 사용! 산소 +15\n");
+    printf("%s 사용! 산소 +%d\n", stacks[n-1].name, stacks[n-1].recovery);
     sleep(1);
 }
 
@@ -397,7 +436,7 @@ void use_oxygen_item() {
                 input_thread_alive = 1;
 
                 pthread_mutex_lock(&planet_lock);
-                status.mood += 20;
+                status.mood += 10;
                 if (status.mood > 100) status.mood = 100; 
                 pthread_mutex_unlock(&planet_lock);
 
@@ -429,7 +468,7 @@ void use_oxygen_item() {
 			pthread_create(&th_input, NULL, input_thread, NULL);
 			input_thread_alive = 1;
             pthread_mutex_lock(&planet_lock);
-            status.mood += 20;
+            status.mood += 10;
             if (status.mood > 100) status.mood = 100;  
             pthread_mutex_unlock(&planet_lock);
 
