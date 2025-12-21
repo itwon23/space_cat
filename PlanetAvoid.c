@@ -185,17 +185,7 @@ void print_center(const char* lines[], int count) {
     
     fflush(stdout);
 }
-int get_single_key() {
-    while (1) {
-        int c = getchar();
-        // ASCII 범위의 문자만 허용 (한글 등 멀티바이트 문자 무시)
-        if (c >= 0 && c <= 127) {
-            // 입력 버퍼 비우기
-            tcflush(STDIN_FILENO, TCIFLUSH);
-            return c;
-        }
-    }
-}
+
 
 // 장애물 타입
 typedef struct { 
