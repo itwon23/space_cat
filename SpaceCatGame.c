@@ -4,7 +4,7 @@
     #include <unistd.h>
     #include <string.h>
     #include <time.h>
-
+	#include "PlanetAvoid.h"
     #include "Inventory.h"
     #include "rhythm.h"
     
