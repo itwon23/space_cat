@@ -551,7 +551,7 @@ void* risk_thread(void* arg) {
     return NULL;
 }
 
-static void* input_thread(void* arg) {
+static void* planet_input_thread(void* arg) {
     (void)arg;
     fd_set readfds;
     struct timeval tv;
@@ -610,7 +610,7 @@ int run_game() {
     draw_top_art_once();
     pthread_t tid_asteroid, tid_input, tid_risk;
     pthread_create(&tid_asteroid, NULL, asteroid_thread, NULL);
-    pthread_create(&tid_input, NULL, input_thread, NULL);
+   pthread_create(&tid_input, NULL, planet_input_thread, NULL); 
     pthread_create(&tid_risk, NULL, risk_thread, NULL);
 
     int collided = 0;
