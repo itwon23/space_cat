@@ -17,11 +17,17 @@ void add_food(Inventory* inv, const char* name, int recovery) {
 }
 
 void add_oxygen(Inventory* inv, int amount) {
+    printf("[DEBUG] add_oxygen 호출: %d개 추가 시도\n", amount);
+    printf("[DEBUG] 현재 oxygen_count: %d\n", inv->oxygen_count);
+    
     for (int i = 0; i < amount && inv->oxygen_count < 20; i++) {
         strcpy(inv->oxygen[inv->oxygen_count].name, "산소통");
         inv->oxygen[inv->oxygen_count].recovery = 1;
         inv->oxygen_count++;
+        printf("[DEBUG] %d번째 추가 완료\n", i+1);
     }
+    
+    printf("[DEBUG] 최종 oxygen_count: %d\n", inv->oxygen_count);
 }
 
 int use_oxygen(Inventory* inv) {
