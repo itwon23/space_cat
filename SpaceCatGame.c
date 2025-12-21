@@ -457,7 +457,7 @@ void use_oxygen_item() {
             if (status.mood > 100) status.mood = 100;  
             pthread_mutex_unlock(&lock);
 
-	        system("stty -echo -icanon");    
+	           
     		printf("게임 종료! 메인으로 돌아갑니다.\n");
     		sleep(2);
     		break;
