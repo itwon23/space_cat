@@ -67,10 +67,10 @@
         else if (r < 35) {
             strcpy(last_event, "🍀 우주 고양이가 선물을 줬다! 생선스낵 +4!\n"
                             "\"이것봐라~ 저쪽에서 찾아왔어. 맛있겠다 그치!\"");
-            if (inv.food_count < 20) {
-                strcpy(inv.food[inv.food_count].name, "생선스낵");
-                inv.food[inv.food_count].recovery = 10;
-                inv.food_count++;
+            if (global_inventory.food_count < 20) {
+                strcpy(global_inventory.food[global_inventory.food_count].name, "생선스낵");
+                global_inventory.food[global_inventory.food_count].recovery = 10;
+                global_inventory.food_count++;
             }
         }
         else if (r < 50) {
@@ -205,31 +205,31 @@
 
 
     void sort_food() {
-        for (int i = 0; i < inv.food_count - 1; i++) {
-            for (int j = i + 1; j < inv.food_count; j++) {
-                if (inv.food[j].recovery > inv.food[i].recovery) {
-                    Item tmp = inv.food[i];
-                    inv.food[i] = inv.food[j];
-                    inv.food[j] = tmp;
+        for (int i = 0; i < global_inventory.food_count - 1; i++) {
+            for (int j = i + 1; j < global_inventory.food_count; j++) {
+                if (global_inventory.food[j].recovery > global_inventory.food[i].recovery) {
+                    Item tmp = global_inventory.food[i];
+                    global_inventory.food[i] = global_inventory.food[j];
+                    global_inventory.food[j] = tmp;
                 }
             }
         }
     }
 
     void sort_oxygen() {
-        for (int i = 0; i < inv.oxygen_count - 1; i++) {
-            for (int j = i + 1; j < inv.oxygen_count; j++) {
-                if (inv.oxygen[j].recovery > inv.oxygen[i].recovery) {
-                    Item tmp = inv.oxygen[i];
-                    inv.oxygen[i] = inv.oxygen[j];
-                    inv.oxygen[j] = tmp;
+        for (int i = 0; i < global_inventory.oxygen_count - 1; i++) {
+            for (int j = i + 1; j < global_inventory.oxygen_count; j++) {
+                if (global_inventory.oxygen[j].recovery > global_inventory.oxygen[i].recovery) {
+                    Item tmp = global_inventory.oxygen[i];
+                    global_inventory.oxygen[i] = global_inventory.oxygen[j];
+                    global_inventory.oxygen[j] = tmp;
                 }
             }
         }
     }
 
 void use_food() {
-    if (inv.food_count == 0) {
+    if (global_inventory.food_count == 0) {
         printf("\n사용할 음식이 없습니다!\n");
         sleep(1);
         return;
@@ -238,19 +238,19 @@ void use_food() {
     ItemStack stacks[20];
     int stack_count = 0;
 
-    for (int i = 0; i < inv.food_count; i++) {
+    for (int i = 0; i < global_inventory.food_count; i++) {
         int found = 0;
         for (int j = 0; j < stack_count; j++) {
-            if (strcmp(inv.food[i].name, stacks[j].name) == 0 &&
-                inv.food[i].recovery == stacks[j].recovery) {
+            if (strcmp(global_inventory.food[i].name, stacks[j].name) == 0 &&
+                global_inventory.food[i].recovery == stacks[j].recovery) {
                 stacks[j].count++;
                 found = 1;
                 break;
             }
         }
         if (!found) {
-            strcpy(stacks[stack_count].name, inv.food[i].name);
-            stacks[stack_count].recovery = inv.food[i].recovery;
+            strcpy(stacks[stack_count].name, global_inventory.food[i].name);
+            stacks[stack_count].recovery = global_inventory.food[i].recovery;
             stacks[stack_count].count = 1;
             stack_count++;
         }
@@ -288,13 +288,13 @@ void use_food() {
     pthread_mutex_unlock(&lock);
 
     int removed = 0;
-    for (int i = 0; i < inv.food_count && !removed; i++) {
-        if (strcmp(inv.food[i].name, stacks[n-1].name) == 0 &&
-            inv.food[i].recovery == stacks[n-1].recovery) {
-            for (int j = i; j < inv.food_count - 1; j++) {
-                inv.food[j] = inv.food[j+1];
+    for (int i = 0; i < global_inventory.food_count && !removed; i++) {
+        if (strcmp(global_inventory.food[i].name, stacks[n-1].name) == 0 &&
+            global_inventory.food[i].recovery == stacks[n-1].recovery) {
+            for (int j = i; j < global_inventory.food_count - 1; j++) {
+                global_inventory.food[j] = global_inventory.food[j+1];
             }
-            inv.food_count--;
+            global_inventory.food_count--;
             removed = 1;
         }
     }
@@ -305,7 +305,7 @@ void use_food() {
 
 
 void use_oxygen() {
-    if (inv.oxygen_count == 0) {
+    if (global_inventory.oxygen_count == 0) {
         printf("\n사용할 산소가 없습니다!\n");
         sleep(1);
         return;
@@ -314,19 +314,19 @@ void use_oxygen() {
     ItemStack stacks[20];
     int stack_count = 0;
 
-    for (int i = 0; i < inv.oxygen_count; i++) {
+    for (int i = 0; i < global_inventory.oxygen_count; i++) {
         int found = 0;
         for (int j = 0; j < stack_count; j++) {
-            if (strcmp(inv.oxygen[i].name, stacks[j].name) == 0 &&
-                inv.oxygen[i].recovery == stacks[j].recovery) {
+            if (strcmp(global_inventory.oxygen[i].name, stacks[j].name) == 0 &&
+                global_inventory.oxygen[i].recovery == stacks[j].recovery) {
                 stacks[j].count++;
                 found = 1;
                 break;
             }
         }
         if (!found) {
-            strcpy(stacks[stack_count].name, inv.oxygen[i].name);
-            stacks[stack_count].recovery = inv.oxygen[i].recovery;
+            strcpy(stacks[stack_count].name, global_inventory.oxygen[i].name);
+            stacks[stack_count].recovery = global_inventory.oxygen[i].recovery;
             stacks[stack_count].count = 1;
             stack_count++;
         }
@@ -364,13 +364,13 @@ void use_oxygen() {
     pthread_mutex_unlock(&lock);
 
     int removed = 0;
-    for (int i = 0; i < inv.oxygen_count && !removed; i++) {
-        if (strcmp(inv.oxygen[i].name, stacks[n-1].name) == 0 &&
-            inv.oxygen[i].recovery == stacks[n-1].recovery) {
-            for (int j = i; j < inv.oxygen_count - 1; j++) {
-                inv.oxygen[j] = inv.oxygen[j+1];
+    for (int i = 0; i < global_inventory.oxygen_count && !removed; i++) {
+        if (strcmp(global_inventory.oxygen[i].name, stacks[n-1].name) == 0 &&
+            global_inventory.oxygen[i].recovery == stacks[n-1].recovery) {
+            for (int j = i; j < global_inventory.oxygen_count - 1; j++) {
+                global_inventory.oxygen[j] = global_inventory.oxygen[j+1];
             }
-            inv.oxygen_count--;
+            global_inventory.oxygen_count--;
             removed = 1;
         }
     }
@@ -417,9 +417,9 @@ void use_oxygen() {
                 pthread_mutex_lock(&lock);
 
                 for (int i = 0; i < r.reward_count; i++) {
-                    if (inv.food_count >=20) break;
-                    inv.food[inv.food_count] = r.reward;
-                    inv.food_count++;
+                    if (global_inventory.food_count >=20) break;
+                    global_inventory.food[global_inventory.food_count] = r.reward;
+                    global_inventory.food_count++;
                 }
                 pthread_mutex_unlock(&lock);
 
@@ -508,15 +508,15 @@ void use_oxygen() {
 
         pthread_mutex_init(&lock, NULL);
 
-        inv.food_count = 3;
-        strcpy(inv.food[0].name, "캔푸드"); inv.food[0].recovery = 20;
-        strcpy(inv.food[1].name, "우주츄르"); inv.food[1].recovery = 30;
-        strcpy(inv.food[2].name, "생선스낵"); inv.food[2].recovery = 10;
+        global_inventory.food_count = 3;
+        strcpy(global_inventory.food[0].name, "캔푸드"); global_inventory.food[0].recovery = 20;
+        strcpy(global_inventory.food[1].name, "우주츄르"); global_inventory.food[1].recovery = 30;
+        strcpy(global_inventory.food[2].name, "생선스낵"); global_inventory.food[2].recovery = 10;
 
-        inv.oxygen_count = 2;
-        strcpy(inv.oxygen[0].name, "미니 산소통"); inv.oxygen[0].recovery = 15;
-        strcpy(inv.oxygen[1].name, "우주 산소통"); inv.oxygen[1].recovery = 30;
-
+        global_inventory.oxygen_count = 2;
+        strcpy(global_inventory.oxygen[0].name, "미니 산소통"); global_inventory.oxygen[0].recovery = 15;
+        strcpy(global_inventory.oxygen[1].name, "우주 산소통"); global_inventory.oxygen[1].recovery = 30;
+		
         pthread_t th_status, th_repair;
 
         pthread_create(&th_status, NULL, decrease_status, NULL);
