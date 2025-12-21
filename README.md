@@ -26,10 +26,10 @@ make : 빌드
 make run : 빌드 및 실행 (리듬게임 bgm 출력을 위한 mpg123 패키지 다운로드)
 
 make run을 한 뒤 게임 진행 시 리듬게임 bgm이 출력이 안된다면
-"""
-sudo apt update
-sudo apt install -y mpg123
-"""
+
+  sudo apt update
+  sudo apt install -y mpg123
+
 이 코드를 직접 입력하면 됨
 
 # 참고
