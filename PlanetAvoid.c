@@ -676,7 +676,7 @@ const char* rules[] = {
     "|  각 키를 2번씩 눌러주세요!               |",
     "+==========================================+"
 };
-print_center(rules, 20);// 줄 수가 17에서 19로 변경!
+print_center(rules, 20);
 
     int c = getchar();
     const char* message;
