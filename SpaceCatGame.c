@@ -23,7 +23,7 @@
 
     CatStatus status;
     extern Inventory global_inventory;  
-    pthread_mutex_t planet_lock;
+    pthread_mutex_t planet_lock = PTHREAD_MUTEX_INITIALIZER; 
     int running = 1;
 
     int dialogue_triggered_20 = 0;
