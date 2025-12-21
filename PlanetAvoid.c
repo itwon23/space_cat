@@ -689,7 +689,7 @@ PlanetAvoidResult planet_avoid_game() {
         lives = 2;
         out.reward = make_item("우주 산소통", 30);
         message = "|  [ 중 ] 목표: 80점 (목숨 2개)            |";
-    } else { 
+    } else if(c=='3'){ 
         base_spawn = 35; base_speed_ns = 250000000; max_asteroids = 25;
         target_score = 100;
         lives = 1;
