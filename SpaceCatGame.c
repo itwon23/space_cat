@@ -13,11 +13,11 @@
         int mood;
     } CatStatus;
 
-    CatStatus status;
-    Inventory inv;
-    pthread_mutex_t lock;
-    int running = 1;
-
+	CatStatus status;
+	extern Inventory global_inventory;
+	pthread_mutex_t lock;
+	int running = 1;
+    
     int dialogue_triggered_20 = 0;
     int dialogue_triggered_50 = 0;
     int dialogue_triggered_70 = 0;
@@ -59,10 +59,10 @@
         else if (r < 35) {
             strcpy(last_event, "🍀 우주 고양이가 선물을 줬다! 생선스낵 +4!\n"
                             "\"이것봐라~ 저쪽에서 찾아왔어. 맛있겠다 그치!\"");
-            if (inv.food_count < 20) {
-                strcpy(inv.food[inv.food_count].name, "생선스낵");
-                inv.food[inv.food_count].recovery = 10;
-                inv.food_count++;
+            if (global_inventory.food_count < 20) {
+                strcpy(global_inventory.food[global_inventory.food_count].name, "생선스낵");
+                global_inventory.food[global_inventory.food_count].recovery = 10;
+                global_inventory.food_count++;
             }
         }
         else if (r < 50) {
@@ -197,31 +197,31 @@
 
 
     void sort_food() {
-        for (int i = 0; i < inv.food_count - 1; i++) {
-            for (int j = i + 1; j < inv.food_count; j++) {
-                if (inv.food[j].recovery > inv.food[i].recovery) {
-                    Item tmp = inv.food[i];
-                    inv.food[i] = inv.food[j];
-                    inv.food[j] = tmp;
+        for (int i = 0; i < global_inventory.food_count - 1; i++) {
+            for (int j = i + 1; j < global_inventory.food_count; j++) {
+                if (global_inventory.food[j].recovery > global_inventory.food[i].recovery) {
+                    Item tmp = global_inventory.food[i];
+                    global_inventory.food[i] = global_inventory.food[j];
+                    global_inventory.food[j] = tmp;
                 }
             }
         }
     }
 
     void sort_oxygen() {
-        for (int i = 0; i < inv.oxygen_count - 1; i++) {
-            for (int j = i + 1; j < inv.oxygen_count; j++) {
-                if (inv.oxygen[j].recovery > inv.oxygen[i].recovery) {
-                    Item tmp = inv.oxygen[i];
-                    inv.oxygen[i] = inv.oxygen[j];
-                    inv.oxygen[j] = tmp;
+        for (int i = 0; i < global_inventory.oxygen_count - 1; i++) {
+            for (int j = i + 1; j < global_inventory.oxygen_count; j++) {
+                if (global_inventory.oxygen[j].recovery > global_inventory.oxygen[i].recovery) {
+                    Item tmp = global_inventory.oxygen[i];
+                    global_inventory.oxygen[i] = global_inventory.oxygen[j];
+                    global_inventory.oxygen[j] = tmp;
                 }
             }
         }
     }
 
     void use_food() {
-        if (inv.food_count == 0) {
+        if (global_inventory.food_count == 0) {
             printf("\n사용할 음식이 없습니다!\n");
             sleep(1);
             return;
@@ -232,8 +232,8 @@
         printf("\n=== FOOD INVENTORY ===\n");
             printf("0) 뒤로가기\n");
 
-        for (int i = 0; i < inv.food_count; i++)
-            printf("%d) %s (+%d)\n", i+1, inv.food[i].name, inv.food[i].recovery);
+        for (int i = 0; i < global_inventory.food_count; i++)
+            printf("%d) %s (+%d)\n", i+1, global_inventory.food[i].name, global_inventory.food[i].recovery);
 
         printf("사용할 음식 번호: ");
         fflush(stdout);
@@ -251,29 +251,29 @@
             return;
         }
 
-        if (n < 1 || n > inv.food_count) {
+        if (n < 1 || n > global_inventory.food_count) {
             printf("잘못된 선택!\n");
             sleep(1);
             return;
         }
 
         pthread_mutex_lock(&lock);
-        status.hunger += inv.food[n-1].recovery;
+        status.hunger += global_inventory.food[n-1].recovery;
         if (status.hunger > 100) status.hunger = 100;
         pthread_mutex_unlock(&lock);
 
-        printf("%s 사용!\n", inv.food[n-1].name);
+        printf("%s 사용!\n", global_inventory.food[n-1].name);
 
-        for (int i = n-1; i < inv.food_count - 1; i++) {
-            inv.food[i] = inv.food[i+1];
+        for (int i = n-1; i < global_inventory.food_count - 1; i++) {
+            global_inventory.food[i] = global_inventory.food[i+1];
         }
-        inv.food_count--;
+        global_inventory.food_count--;
 
         sleep(1);
     }
 
     void use_oxygen() {
-        if (inv.oxygen_count == 0) {
+        if (global_inventory.oxygen_count == 0) {
             printf("\n사용할 산소가 없습니다!\n");
             sleep(1);
             return;
@@ -284,8 +284,8 @@
         printf("\n=== OXYGEN INVENTORY ===\n");
                 printf("0) 뒤로가기\n");
 
-        for (int i = 0; i < inv.oxygen_count; i++)
-            printf("%d) %s (+%d)\n", i+1, inv.oxygen[i].name, inv.oxygen[i].recovery);
+        for (int i = 0; i < global_inventory.oxygen_count; i++)
+            printf("%d) %s (+%d)\n", i+1, global_inventory.oxygen[i].name, global_inventory.oxygen[i].recovery);
 
         printf("사용할 산소 번호: ");
         fflush(stdout);
@@ -304,23 +304,23 @@
         }
 
 
-        if (n < 1 || n > inv.oxygen_count) {
+        if (n < 1 || n > global_inventory.oxygen_count) {
             printf("잘못된 선택!\n");
             sleep(1);
             return;
         }
 
         pthread_mutex_lock(&lock);
-        status.oxygen += inv.oxygen[n-1].recovery;
+        status.oxygen += global_inventory.oxygen[n-1].recovery;
         if (status.oxygen > 100) status.oxygen = 100;
         pthread_mutex_unlock(&lock);
 
-        printf("%s 사용!\n", inv.oxygen[n-1].name);
+        printf("%s 사용!\n", global_inventory.oxygen[n-1].name);
 
-        for (int i = n-1; i < inv.oxygen_count - 1; i++) {
-            inv.oxygen[i] = inv.oxygen[i+1];
+        for (int i = n-1; i < global_inventory.oxygen_count - 1; i++) {
+            global_inventory.oxygen[i] = global_inventory.oxygen[i+1];
         }
-        inv.oxygen_count--;
+        global_inventory.oxygen_count--;
 
         sleep(1);
     }
@@ -362,9 +362,9 @@
                 pthread_mutex_lock(&lock);
 
                 for (int i = 0; i < r.reward_count; i++) {
-                    if (inv.food_count >=20) break;
-                    inv.food[inv.food_count] = r.reward;
-                    inv.food_count++;
+                    if (global_inventory.food_count >=20) break;
+                    global_inventory.food[global_inventory.food_count] = r.reward;
+                    global_inventory.food_count++;
                 }
                 pthread_mutex_unlock(&lock);
 
@@ -453,14 +453,14 @@
 
         pthread_mutex_init(&lock, NULL);
 
-        inv.food_count = 3;
-        strcpy(inv.food[0].name, "캔푸드"); inv.food[0].recovery = 20;
-        strcpy(inv.food[1].name, "우주츄르"); inv.food[1].recovery = 30;
-        strcpy(inv.food[2].name, "생선스낵"); inv.food[2].recovery = 10;
+        global_inventory.food_count = 3;
+        strcpy(global_inventory.food[0].name, "캔푸드"); global_inventory.food[0].recovery = 20;
+        strcpy(global_inventory.food[1].name, "우주츄르"); global_inventory.food[1].recovery = 30;
+        strcpy(global_inventory.food[2].name, "생선스낵"); global_inventory.food[2].recovery = 10;
 
-        inv.oxygen_count = 2;
-        strcpy(inv.oxygen[0].name, "미니 산소통"); inv.oxygen[0].recovery = 15;
-        strcpy(inv.oxygen[1].name, "우주 산소통"); inv.oxygen[1].recovery = 30;
+        global_inventory.oxygen_count = 2;
+        strcpy(global_inventory.oxygen[0].name, "미니 산소통"); global_inventory.oxygen[0].recovery = 15;
+        strcpy(global_inventory.oxygen[1].name, "우주 산소통"); global_inventory.oxygen[1].recovery = 30;
 
         pthread_t th_status, th_repair;
 
