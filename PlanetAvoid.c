@@ -691,6 +691,7 @@ int tmp;
 while ((tmp = getchar()) != '\n' && tmp != EOF);
 tcflush(STDIN_FILENO, TCIFLUSH);
 
+printf("\033[2J\033[H");  
 
 system("stty raw -echo");
 int c = getchar();
@@ -730,9 +731,8 @@ if (c == '1') {
     int result = run_game();
    // printf("\033[2J\033[H");
 	int oxygen = survival_time / 10;
-	printf("\n[DEBUG] survival_time: %d, oxygen: %d\n", survival_time, oxygen);  // 👈 추가
-	add_oxygen(&global_inventory, oxygen);
-	printf("[DEBUG] add_oxygen 완료!\n");  // 👈 추가
+	
+	add_oxygen(&global_inventory, oxygen)
 	sleep(2);  // 👈 추가
 	
     char line1[100], line2[100], line3[100];
