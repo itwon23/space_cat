@@ -45,8 +45,7 @@ int use_oxygen(Inventory* inv) {
 
 void show_inventory(Inventory* inv) {
     
-    sort_food();
-    sort_oxygen();
+
 
 
     printf("\n===== 인벤토리 =====\n");
