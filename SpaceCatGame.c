@@ -88,7 +88,7 @@
         while (running) {
             sleep(5);
 
-            pthread_mutex_lock(&lock);
+            pthread_mutex_lock(&planet_lock);
             status.hunger -= rand() % 2 + 1;
             status.oxygen -= rand() % 2  + 1;
             status.mood   -= rand() % 2 + 1;
@@ -98,7 +98,7 @@
             if (status.hunger < 0) status.hunger = 0;
             if (status.oxygen < 0) status.oxygen = 0;
             if (status.mood < 0) status.mood = 0;
-            pthread_mutex_unlock(&lock);
+            pthread_mutex_unlock(&planet_lock);
         }
         return NULL;
     }
@@ -136,7 +136,7 @@
     void show_status() {
         system("clear");
 
-        pthread_mutex_lock(&lock);
+        pthread_mutex_lock(&planet_lock);
         int bar = (int)(repair_progress / 2);  
 
         printf("=== 우주선 수리 진행도 ===\n");
@@ -145,7 +145,7 @@
             printf("%s", (i < bar) ? "■" : "□");
         printf("] %.1f%%\n\n", repair_progress);
 
-        pthread_mutex_unlock(&lock);
+        pthread_mutex_unlock(&planet_lock);
 
         printf(" ,-.       _,---._ __  / \\\n");
         printf("/  )    .-'       `./ /   \\\n");
@@ -161,7 +161,7 @@
 
         printf("=== SPACE CAT STATUS ===\n");
 
-        pthread_mutex_lock(&lock);
+        pthread_mutex_lock(&planet_lock);
 
         printf("허기: %s[", get_color(status.hunger));
         print_status_bar(status.hunger);
@@ -188,7 +188,7 @@
         fflush(stdout);
 
         
-    pthread_mutex_unlock(&lock);
+    pthread_mutex_unlock(&planet_lock);
 
     printf("\n");
 
@@ -282,10 +282,10 @@ void use_food() {
         return;
     }
 
-    pthread_mutex_lock(&lock);
+    pthread_mutex_lock(&planet_lock);
     status.hunger += stacks[n-1].recovery;
     if (status.hunger > 100) status.hunger = 100;
-    pthread_mutex_unlock(&lock);
+    pthread_mutex_unlock(&planet_lock);
 
     int removed = 0;
     for (int i = 0; i < global_inventory.food_count && !removed; i++) {
@@ -358,10 +358,10 @@ void use_oxygen_item() {
         return;
     }
 
-    pthread_mutex_lock(&lock);
+    pthread_mutex_lock(&planet_lock);
     status.oxygen += stacks[n-1].recovery;
     if (status.oxygen > 100) status.oxygen = 100;
-    pthread_mutex_unlock(&lock);
+    pthread_mutex_unlock(&planet_lock);
 
     int removed = 0;
     for (int i = 0; i < global_inventory.oxygen_count && !removed; i++) {
@@ -414,22 +414,22 @@ void use_oxygen_item() {
 
                 RhythmGameResult r = rhythm_game();
 
-                pthread_mutex_lock(&lock);
+                pthread_mutex_lock(&planet_lock);
 
                 for (int i = 0; i < r.reward_count; i++) {
                     if (global_inventory.food_count >=20) break;
                     global_inventory.food[global_inventory.food_count] = r.reward;
                     global_inventory.food_count++;
                 }
-                pthread_mutex_unlock(&lock);
+                pthread_mutex_unlock(&planet_lock);
 
                 pthread_create(&th_input, NULL, input_thread, NULL);
                 input_thread_alive = 1;
 
-                pthread_mutex_lock(&lock);
+                pthread_mutex_lock(&planet_lock);
                 status.mood += 20;
                 if (status.mood > 100) status.mood = 100; 
-                pthread_mutex_unlock(&lock);
+                pthread_mutex_unlock(&planet_lock);
 
                 printf("\n[🎵 리듬 게임 🎵 완료] %s x %d 획득!\n", r.reward.name, r.reward_count);
                 sleep(1);
@@ -452,10 +452,10 @@ void use_oxygen_item() {
 			// 입력 스레드 재시작
 			pthread_create(&th_input, NULL, input_thread, NULL);
 			input_thread_alive = 1;
-            pthread_mutex_lock(&lock);
+            pthread_mutex_lock(&planet_lock);
             status.mood += 20;
             if (status.mood > 100) status.mood = 100;  
-            pthread_mutex_unlock(&lock);
+            pthread_mutex_unlock(&planet_lock);
 
 	           
     		printf("게임 종료! 메인으로 돌아갑니다.\n");
@@ -476,9 +476,9 @@ void use_oxygen_item() {
 
             sleep(1);
 
-            pthread_mutex_lock(&lock);
+            pthread_mutex_lock(&planet_lock);
             repair_progress = (i + 1) * (100.0 / total_time);
-            pthread_mutex_unlock(&lock);
+            pthread_mutex_unlock(&planet_lock);
         }
 
         if (running) {
@@ -537,9 +537,9 @@ void use_oxygen_item() {
         while (running) {
         show_status();
 
-        pthread_mutex_lock(&lock);
+        pthread_mutex_lock(&planet_lock);
         float p = repair_progress;
-        pthread_mutex_unlock(&lock);
+        pthread_mutex_unlock(&planet_lock);
 
         if (status.hunger <= 25 && status.oxygen <= 25 && status.mood <= 25) {
             system("clear");
