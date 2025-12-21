@@ -645,6 +645,9 @@ int run_game() {
 }
 
 int planet_avoid_game() {
+    struct termios saved_termios;
+    tcgetattr(STDIN_FILENO, &saved_termios);
+    
     init_terminal();
     
     struct timespec ts;
@@ -767,6 +770,9 @@ fflush(stdout);
 system("stty raw -echo");
 int key = getchar();
 system("stty cooked echo");
+
+tcsetattr(STDIN_FILENO, TCSANOW, &saved_termios);
+printf("\033[?25h");
 
 printf("\033[2J\033[H");
 return 0;
