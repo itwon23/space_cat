@@ -2,6 +2,5 @@
 #define SPACECATGAME_H
 
 void run_space_cat_game();
-int planet_avoid_game();
 
 #endif
