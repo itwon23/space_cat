@@ -677,25 +677,33 @@ PlanetAvoidResult planet_avoid_game() {
 
     int c = getchar();
     const char* message;
+	while (1) {
+    c = getchar();
+    
     if (c == '1') {
         base_spawn = 20; base_speed_ns = 350000000; max_asteroids = 15;
         target_score = 50;
         lives = 3;
         out.reward = make_item("미니 산소통", 15);
         message = "|  [ 하 ] 목표: 50점 (목숨 3개)            |";
+        break;
     } else if (c == '2') {
         base_spawn = 25; base_speed_ns = 300000000; max_asteroids = 20;
         target_score = 80;
         lives = 2;
         out.reward = make_item("우주 산소통", 30);
         message = "|  [ 중 ] 목표: 80점 (목숨 2개)            |";
-    } else if(c=='3'){ 
+        break;
+    } else if (c == '3') { 
         base_spawn = 35; base_speed_ns = 250000000; max_asteroids = 25;
         target_score = 100;
         lives = 1;
         out.reward = make_item("우주 산소통", 30);
         message = "|  [ 상 ] 목표: 100점 (목숨 1개)           |";
+        break;
     }
+ 
+}
 
     const char* msg_block[] = { 
         "+==========================================+",
