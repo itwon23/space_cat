@@ -448,11 +448,7 @@ void use_oxygen_item() {
     		sleep(1);
     
     		 planet_avoid_game(); //system("./planet_avoid");
-            struct termios normal;
-			tcgetattr(STDIN_FILENO, &normal);
-			normal.c_lflag |= (ICANON | ECHO);
-			tcsetattr(STDIN_FILENO, TCSANOW, &normal);
-	
+      
 			// 입력 스레드 재시작
 			pthread_create(&th_input, NULL, input_thread, NULL);
 			input_thread_alive = 1;
