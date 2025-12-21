@@ -442,7 +442,7 @@ void use_oxygen_item() {
 		    printf("행성 피하기 게임 시작!\n");
     		sleep(1);
     
-    		system("./planet_avoid");
+    		//system("./planet_avoid");
             
             pthread_mutex_lock(&lock);
             status.mood += 20;
