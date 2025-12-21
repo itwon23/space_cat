@@ -303,7 +303,6 @@ void use_food() {
     sleep(1);
 }
 
-
 void use_oxygen_item() {
     if (global_inventory.oxygen_count == 0) {
         printf("\n사용할 산소가 없습니다!\n");
@@ -311,73 +310,42 @@ void use_oxygen_item() {
         return;
     }
     
-    ItemStack stacks[20];
-    int stack_count = 0;
-
-    for (int i = 0; i < global_inventory.oxygen_count; i++) {
-        int found = 0;
-        for (int j = 0; j < stack_count; j++) {
-            if (strcmp(global_inventory.oxygen[i].name, stacks[j].name) == 0 &&
-                global_inventory.oxygen[i].recovery == stacks[j].recovery) {
-                stacks[j].count++;
-                found = 1;
-                break;
-            }
-        }
-        if (!found) {
-            strcpy(stacks[stack_count].name, global_inventory.oxygen[i].name);
-            stacks[stack_count].recovery = global_inventory.oxygen[i].recovery;
-            stacks[stack_count].count = 1;
-            stack_count++;
-        }
-    }
-
+    // 단순화: oxygen_count만 사용 (배열 사용 안 함)
     printf("\n=== OXYGEN INVENTORY ===\n");
     printf("0) 뒤로가기\n");
-    for (int i = 0; i < stack_count; i++) {
-        printf("%d) %s (+%d) x%d\n", i+1, stacks[i].name, stacks[i].recovery, stacks[i].count);
-    }
-
+    printf("1) 우주 산소통 (+15) x%d\n", global_inventory.oxygen_count);
+    
     printf("사용할 산소 번호: ");
     fflush(stdout);
-
+    
     while (item_choice == -1 && running) {
         usleep(100 * 1000);
     }
     int n = item_choice;
     item_choice = -1;
-
+    
     if (n == 0) {
         printf("뒤로 갑니다...\n");
         sleep(1);
         return;
     }
-    if (n < 1 || n > stack_count) {
+    if (n != 1) {
         printf("잘못된 선택!\n");
         sleep(1);
         return;
     }
-
+    
     pthread_mutex_lock(&planet_lock);
-    status.oxygen += stacks[n-1].recovery;
+    global_inventory.oxygen_count--;
+    status.oxygen += 15;
     if (status.oxygen > 100) status.oxygen = 100;
     pthread_mutex_unlock(&planet_lock);
-
-    int removed = 0;
-    for (int i = 0; i < global_inventory.oxygen_count && !removed; i++) {
-        if (strcmp(global_inventory.oxygen[i].name, stacks[n-1].name) == 0 &&
-            global_inventory.oxygen[i].recovery == stacks[n-1].recovery) {
-            for (int j = i; j < global_inventory.oxygen_count - 1; j++) {
-                global_inventory.oxygen[j] = global_inventory.oxygen[j+1];
-            }
-            global_inventory.oxygen_count--;
-            removed = 1;
-        }
-    }
-
-    printf("%s 사용!\n", stacks[n-1].name);
+    
+    printf("우주 산소통 사용! 산소 +15\n");
     sleep(1);
 }
+
+
 
 
     void play_with_cat() {
