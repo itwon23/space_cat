@@ -648,7 +648,7 @@ int planet_avoid_game() {
     struct termios saved_termios;
     tcgetattr(STDIN_FILENO, &saved_termios);
     
-    init_terminal();
+    //init_terminal();
     
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
@@ -679,6 +679,10 @@ int planet_avoid_game() {
         "+==========================================+"
     };
 print_center(rules, 20);
+struct termios normal;
+    tcgetattr(STDIN_FILENO, &normal);
+    normal.c_lflag |= (ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &normal);
 
 
 
