@@ -724,8 +724,8 @@ if (c == '1') {
     printf("\033[2J\033[H");
 
     int oxygen = survival_time / 10;
-
-    char line1[100], line2[100], line3[100];
+	add_oxygen(&global_inventory, oxygen);
+	char line1[100], line2[100], line3[100];
 
 	if (result == 2) {
     		strcpy(line1, "|  목표 달성! 성공!                       |");
