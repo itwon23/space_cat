@@ -649,7 +649,11 @@ int planet_avoid_game() {
     tcgetattr(STDIN_FILENO, &saved_termios);
     
     //init_terminal();
-    
+    // 터미널 설정 직접 추가 
+    struct termios new_termios = saved_termios;
+    new_termios.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &new_termios);
+    printf("\033[?25l");  // 커서 숨김
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
     rand_seed = ts.tv_nsec;
