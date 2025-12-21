@@ -685,7 +685,7 @@ print_center(rules, 20);
 
 int tmp;
 while ((tmp = getchar()) != '\n' && tmp != EOF);
-
+tcflush(STDIN_FILENO, TCIFLUSH);
 
 
 system("stty raw -echo");
