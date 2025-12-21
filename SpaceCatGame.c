@@ -383,12 +383,14 @@ void use_oxygen_item() {
                 RhythmGameResult r = rhythm_game();
 
                 pthread_mutex_lock(&planet_lock);
-
+                
+                //인벤토리 보상 추가
                 for (int i = 0; i < r.reward_count; i++) {
                     if (global_inventory.food_count >=20) break;
                     global_inventory.food[global_inventory.food_count] = r.reward;
                     global_inventory.food_count++;
                 }
+
                 pthread_mutex_unlock(&planet_lock);
 
                 pthread_create(&th_input, NULL, input_thread, NULL);
@@ -415,8 +417,14 @@ void use_oxygen_item() {
 		    printf("행성 피하기 게임 시작!\n");
     		sleep(1);
     
-    		 planet_avoid_game(); //system("./planet_avoid");
-      
+    		PlanetAvoidResult r = planet_avoid_game(); //system("./planet_avoid");
+
+            for (int i = 0; i < r.reward_count; i++) {
+                if (global_inventory.oxygen_count >=20) break;
+                global_inventory.oxygen[global_inventory.oxygen_count] = r.reward;
+                global_inventory.oxygen_count++;
+            }
+
 			// 입력 스레드 재시작
 			pthread_create(&th_input, NULL, input_thread, NULL);
 			input_thread_alive = 1;

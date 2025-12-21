@@ -31,13 +31,13 @@ typedef struct {
     int active;
 } Note;
 
-static Item make_item(const char* name, int recovery) {
-    Item it;
-    memset(&it, 0, sizeof(it));
-    strncpy(it.name, name, sizeof(it.name) - 1);
-    it.recovery = recovery;
-    return it;
-}
+// static Item make_item(const char* name, int recovery) {
+//     Item it;
+//     memset(&it, 0, sizeof(it));
+//     strncpy(it.name, name, sizeof(it.name) - 1);
+//     it.recovery = recovery;
+//     return it;
+// }
 
 static float get_time_sec(void) {
     struct timespec ts;
@@ -142,7 +142,7 @@ static void play_random_bgm(void) {
 
 //리듬 게임 함수
 RhythmGameResult rhythm_game(void) {
-    RhythmGameResult out = {0, {0}, 0};
+    RhythmGameResult out = {{0}, 0};
     out.reward = make_item("캔푸드", 20);  // 기본값
 
     setlocale(LC_ALL, "");
@@ -247,7 +247,6 @@ RhythmGameResult rhythm_game(void) {
 
     clear();
 
-    out.score = score;
     out.reward_count = score / 7;
 
     char end1[] = "=== 미니게임 종료 ===";
