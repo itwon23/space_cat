@@ -439,6 +439,11 @@ void use_oxygen_item() {
 
 
 	    case 2:
+			if (input_thread_alive) {
+        pthread_cancel(th_input);
+        pthread_join(th_input, NULL);
+        input_thread_alive = 0;
+    }
 		    printf("행성 피하기 게임 시작!\n");
     		sleep(1);
     
