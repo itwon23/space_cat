@@ -272,7 +272,7 @@
         sleep(1);
     }
 
-    void use_oxygen() {
+    void use_oxygen_item() {
         if (global_inventory.oxygen_count == 0) {
             printf("\n사용할 산소가 없습니다!\n");
             sleep(1);
@@ -497,7 +497,7 @@
             switch(user_choice) {
                 case 0: running = 0; break;
                 case 1: use_food(); break;
-                case 2: use_oxygen(); break;
+                case 2: use_oxygen_item(); break;
                 case 3: play_with_cat(); break;
                 default: printf("잘못된 입력!\n"); sleep(1);
             }
