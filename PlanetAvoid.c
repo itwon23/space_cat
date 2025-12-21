@@ -197,9 +197,9 @@ typedef struct {
     int is_big;
 } Obstacle;
 static Obstacle obstacles[MAX_ASTEROIDS];        
-static int obstacle_count = 0;                   
+static int obstacle_count = 0;       
 
-static pthread_mutex_t planet_lock = PTHREAD_MUTEX_INITIALIZER;
+extern pthread_mutex_t planet_lock;
 static pthread_cond_t cond = PTHREAD_COND_INITIALIZER;  
 static volatile int planet_running = 1;                   
 
@@ -287,7 +287,7 @@ void draw_background_arts() {
 }
 
 int check_collision() {
-    pthread_mutex_lock(&lock);
+    pthread_mutex_lock(&planet_lock);
     for (int i = 0; i < obstacle_count; i++) {
         int ax = obstacles[i].x;
         int ay = obstacles[i].y;
@@ -364,7 +364,7 @@ void draw_screen() {
         screen[i][WIDTH - 1] = '|';
     }
 
-    pthread_mutex_lock(&lock);
+    pthread_mutex_lock(&planet_lock);
     
     double now = get_time_seconds();
     survival_time = (int)(now - start_time);
@@ -462,7 +462,7 @@ void* asteroid_thread(void* arg) {
         long sleep_duration = base_speed_ns - (long)(elapsed * 5000000);
         if (sleep_duration < 90000000) sleep_duration = 90000000;
         
-        pthread_mutex_lock(&lock);
+        pthread_mutex_lock(&planet_lock);
         if (darkness_slow_mode) {
             sleep_duration = sleep_duration * 2;
         }
@@ -471,7 +471,7 @@ void* asteroid_thread(void* arg) {
         }
         pthread_mutex_unlock(&planet_lock);
 
-        pthread_mutex_lock(&lock);
+        pthread_mutex_lock(&planet_lock);
         double now = get_time_seconds();
         
         if (obstacle_count < max_asteroids - 1 && (now - last_big_spawn) > 15.0) {
@@ -520,7 +520,7 @@ void* risk_thread(void* arg) {
         
         if (!planet_running) break;
         
-        pthread_mutex_lock(&lock);
+        pthread_mutex_lock(&planet_lock);
         if (current_risk == RISK_NONE) {
             double now = get_time_seconds();
             int risk_type = rand_r(&local_seed) % 4;
@@ -566,13 +566,13 @@ static void* planet_input_thread(void* arg) {
         if (ret > 0) {
             int c = getchar();
             if (c == 'a' || c == 'A') {
-                pthread_mutex_lock(&lock);
+                pthread_mutex_lock(&planet_lock);
                 cat_x -= cat_speed;
                 if (cat_x < 1) cat_x = 1;
                 current_cat = cat_left;
                 pthread_mutex_unlock(&planet_lock);
             } else if (c == 'd' || c == 'D') {
-                pthread_mutex_lock(&lock);
+                pthread_mutex_lock(&planet_lock);
                 cat_x += cat_speed;
                 if (cat_x > WIDTH - cat_width - 1)
                     cat_x = WIDTH - cat_width - 1;
@@ -581,7 +581,7 @@ static void* planet_input_thread(void* arg) {
             } else if (c == 'q' || c == 'Q') {
                 planet_running = 0;
             } else {
-                pthread_mutex_lock(&lock);
+                pthread_mutex_lock(&planet_lock);
                 current_cat = cat_front;
                 pthread_mutex_unlock(&planet_lock);
             }
